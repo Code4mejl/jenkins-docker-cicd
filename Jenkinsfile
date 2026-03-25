@@ -1,27 +1,25 @@
 pipeline {
-
     agent any
 
     stages {
 
-        stage('Clone Repository') {
+        stage('Build Docker Image') {
             steps {
-                git 'https://github.com/Code4mejl/jenkins-docker-cicd.git'
+                bat 'docker build -t devops-web .'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Stop Old Container') {
             steps {
-                bat 'docker build -t mywebsite .'
+                bat 'docker stop devops-container || exit 0'
+                bat 'docker rm devops-container || exit 0'
             }
         }
 
         stage('Deploy Container') {
             steps {
-                bat 'docker rm -f devops-container || exit 0'
-                bat 'docker run -d -p 8082:80 --name devops-container mywebsite'
+                bat 'docker run -d -p 8082:80 --name devops-container devops-web'
             }
         }
-
     }
 }
